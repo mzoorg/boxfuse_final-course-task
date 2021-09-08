@@ -1,0 +1,67 @@
+---
+- name: Build my boxfuse-docker-img and push to repo 
+  hosts: localhost
+  connection: local
+  become: yes
+
+  tasks:
+    # install docker io
+    #- name: Install aptitude using apt
+    #  apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+    - name: Install required system packages
+      apt: name={{ item }} state=present update_cache=yes
+      loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt: update_cache=yes name=docker-ce state=latest
+    #create volume
+    - name: Create a volume
+      community.docker.docker_volume:
+        name: volume_data
+    #docker build build-image
+    - name: Build build-image
+      community.docker.docker_image:
+        name: build-image
+        build:
+          path: env_build
+        source: build
+    # docker run (build-Dockerfile) to put artifact into volume
+    - name: Start build container
+      community.docker.docker_container:
+        name: build-container
+        image: build-image
+        volumes:
+          - volume_data:/data/share
+        command: ["cp", "/data/boxfuse-orig/target/hello-1.0.war", "/data/share/"]
+    
+    - name: Copy artifact to app_build folder
+      ansible.builtin.copy:
+        src: /var/lib/docker/volumes/volume_data/_data/
+        dest: app_build
+
+    #docker login
+    - name: Log into DockerHub
+      community.docker.docker_login:
+        username: mzoorg
+        password: b2f61c48-8b97-47a5-9355-e22838caf3b5
+
+    # docker build (app-Dockerfile with volume) and push to docker hub registry
+    - name: Build app-image and push to repo
+      community.docker.docker_image:
+        name: mzoorg/boxfuse-img
+        build:
+          path: app_build
+        #tag: v1
+        push: yes
+        source: build
