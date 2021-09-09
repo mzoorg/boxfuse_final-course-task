@@ -5,11 +5,7 @@ resource "aws_instance" "aws-host1" {
     key_name = aws_key_pair.mykeypair22.key_name
 
     #If content files placed locally. If no, use git clone instead
-    provisioner "file" {
-        source      = "content"
-        destination = "/home/ubuntu/"
-    }
-    
+        
     provisioner "remote-exec" {
         inline = [
             "until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
@@ -34,12 +30,11 @@ resource "aws_instance" "aws-host2" {
     instance_type = "t2.micro"
     security_groups = ["${aws_security_group.allow_ssh.name}","${aws_security_group.allow_http.name}"]
     key_name = aws_key_pair.mykeypair22.key_name
-
+    
     provisioner "remote-exec" {
         inline = [
             "until [ -f /var/lib/cloud/instance/boot-finished ]; do sleep 1; done",
-            "sudo apt update", "sudo apt install -y docker.io",
-            "sudo docker run -d -p 80:8080 mzoorg/boxfuse-img"
+            "sudo apt update", "sudo apt install -y docker.io"
         ]
     }
     
@@ -57,7 +52,12 @@ resource "null_resource" "aws-host1_exec_ansible_buld" {
     
     triggers = {
         always_run = "${timestamp()}"
-    }     
+    }
+
+    provisioner "file" {
+        source      = "content"
+        destination = "/home/ubuntu/"
+    }
 
     provisioner "remote-exec" {
         inline = ["sudo ansible-playbook /home/ubuntu/content/build.yml --extra-vars \"my_dockerhub_pass=${var.my_dockerhub_pass}\""]
