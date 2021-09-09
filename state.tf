@@ -2,6 +2,11 @@ provider "aws" {
   region = "us-east-2"
 }
 
+resource "aws_key_pair" "mykeypair22" {
+    key_name = "mykeypair22"
+    public_key = var.my_public_key
+}
+
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh"
   description = "allow ssh traffic"
@@ -66,9 +71,4 @@ resource "aws_security_group" "allow_http" {
       self              = null
     }
   ]
-}
-
-resource "aws_key_pair" "mykeypair22" {
-    key_name = "mykeypair22"
-    public_key = var.public_key
 }

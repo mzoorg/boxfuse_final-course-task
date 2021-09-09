@@ -54,7 +54,7 @@
     - name: Log into DockerHub
       community.docker.docker_login:
         username: mzoorg
-        password: #set yout pass here
+        password: {{ my_dockerhub_pass }}
 
     # docker build (app-Dockerfile with volume) and push to docker hub registry
     - name: Build app-image and push to repo
