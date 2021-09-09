@@ -20,8 +20,7 @@ resource "aws_instance" "aws-host1" {
             type     = "ssh"
             user     = var.username
             host     = self.public_ip
-            private_key = "${file("C:/Users/User/Documents/sshkey1/aws/mykey0908.pem")}"
-            #private_key = var.my_private_key
+            private_key = var.my_private_key
         }
 }
 
@@ -42,8 +41,7 @@ resource "aws_instance" "aws-host2" {
             type     = "ssh"
             user     = var.username
             host     = self.public_ip
-            private_key = "${file("C:/Users/User/Documents/sshkey1/aws/mykey0908.pem")}"
-            #private_key = var.my_private_key
+            private_key = var.my_private_key
         }
 }
 
@@ -67,8 +65,7 @@ resource "null_resource" "aws-host1_exec_ansible_buld" {
             type     = "ssh"
             user     = var.username
             host     = "${aws_instance.aws-host1.public_ip}"
-            private_key = "${file("C:/Users/User/Documents/sshkey1/aws/mykey0908.pem")}"
-            #private_key = var.my_private_key
+            private_key = var.my_private_key
         }
 }
 
@@ -87,7 +84,6 @@ resource "null_resource" "aws-host2_exec_ansible_buld" {
             type     = "ssh"
             user     = var.username
             host     = "${aws_instance.aws-host2.public_ip}"
-            private_key = "${file("C:/Users/User/Documents/sshkey1/aws/mykey0908.pem")}"
-            #private_key = var.my_private_key
+            private_key = var.my_private_key
         }
 }
